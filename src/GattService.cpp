@@ -74,7 +74,7 @@ DBusObject &GattService::gattServiceEnd()
 //     "secure-read" (Server only)
 //     "secure-write" (Server only)
 //
-GattCharacteristic &GattService::gattCharacteristicBegin(const std::string &pathElement, const GattUuid &uuid, const std::vector<const char *> &flags)
+GattCharacteristic &GattService::gattCharacteristicBegin(const std::string &pathElement, const GattUuid &uuid, const std::vector<std::string> &flags)
 {
 	DBusObject &child = owner.addChild(DBusObjectPath(pathElement));
 	GattCharacteristic &characteristic = *child.addInterface(std::make_shared<GattCharacteristic>(child, *this, "org.bluez.GattCharacteristic1"));

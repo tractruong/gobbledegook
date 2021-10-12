@@ -210,7 +210,7 @@ struct GattCharacteristic : GattInterface
 		GVariant *pVariant = Utils::gvariantFromByteArray(value);
 		sendChangeNotificationVariant(pBusConnection, pVariant);
 	}
-
+	std::string pPath;
 protected:
 
 	GattService &service;

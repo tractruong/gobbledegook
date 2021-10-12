@@ -84,7 +84,8 @@ struct GattService : GattInterface
 	//     "secure-read" (Server only)
 	//     "secure-write" (Server only)
 	//
-	GattCharacteristic &gattCharacteristicBegin(const std::string &pathElement, const GattUuid &uuid, const std::vector<const char *> &flags);
+	// [tt] change to use std::string because of storing name in variables
+	GattCharacteristic &gattCharacteristicBegin(const std::string &pathElement, const GattUuid &uuid, const std::vector<std::string> &flags);
 
 	// Returns a string identifying the type of interface
 	virtual const std::string getInterfaceType() const { return GattService::kInterfaceType; }

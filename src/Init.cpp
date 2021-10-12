@@ -669,7 +669,7 @@ void registerObjects()
 // See also: https://git.kernel.org/pub/scm/bluetooth/bluez.git/tree/doc/mgmt-api.txt
 void configureAdapter()
 {
-	Mgmt mgmt;
+	Mgmt mgmt(1); //[tt] this is hw dev index - check by 'sudo btmgmt info' command
 
 	// Get our properly truncated advertising names
 	std::string advertisingName = Mgmt::truncateName(TheServer->getAdvertisingName());

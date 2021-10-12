@@ -1,0 +1,40 @@
+{
+  "services": [
+    {
+      "name": "device",
+      "uuid": "180A",
+      "characteristics": [
+        {
+          "name": "mfgr_name",
+          "uuid": "2A29",
+          "flags": [
+            "read", "write"
+          ],
+          "default-value": "Acme Inc."
+        },
+        {
+          "name": "model_num",
+          "uuid": "2A24",
+          "flags": [
+            "read", "write"
+          ],
+          "default-value": "Marvin-PA"
+        }
+      ]
+    },
+    {
+      "name": "battery",
+      "uuid": "180F",
+      "characteristics": [
+        {
+          "name": "level",
+          "uuid": "2A19",
+          "flags": [
+            "read", "write", "notify"
+          ],
+          "default-value": "60%"
+        }
+      ]
+    }
+  ]
+}

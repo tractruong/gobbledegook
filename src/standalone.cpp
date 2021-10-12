@@ -96,7 +96,7 @@
 #include <iostream>
 #include <thread>
 #include <sstream>
-
+#include <unordered_map>
 #include "../include/Gobbledegook.h"
 
 //
@@ -115,6 +115,8 @@ static uint8_t serverDataBatteryLevel = 78;
 
 // The text string ("text/string") used by our custom text string service (see Server.cpp)
 static std::string serverDataTextString = "Hello, world!";
+
+std::unordered_map<std::string, std::string> server_data;
 
 //
 // Logging
@@ -185,11 +187,17 @@ const void *dataGetter(const char *pName)
 
 	if (strName == "battery/level")
 	{
-		return &serverDataBatteryLevel;
+		server_data[strName] = std::string(1, char(serverDataBatteryLevel));
+		LogDebug((std::string("Server data: GET battery/level ") + 
+			std::to_string(serverDataBatteryLevel)).c_str());
+		return server_data[strName].c_str();
 	}
-	else if (strName == "text/string")
+
+	if (server_data.find(strName) != server_data.end())
 	{
-		return serverDataTextString.c_str();
+		LogDebug((std::string("Server data: GET ") + strName + " <= "  + 
+					server_data[strName]).c_str());
+		return server_data[strName].c_str();
 	}
 
 	LogWarn((std::string("Unknown name for server data getter request: '") + pName + "'").c_str());
@@ -216,17 +224,27 @@ int dataSetter(const char *pName, const void *pData)
 	}
 
 	std::string strName = pName;
-
 	if (strName == "battery/level")
 	{
-		serverDataBatteryLevel = *static_cast<const uint8_t *>(pData);
-		LogDebug((std::string("Server data: battery level set to ") + std::to_string(serverDataBatteryLevel)).c_str());
+		// filter set data
+		std::string check_data = std::string(static_cast<const char *>(pData));
+		if ( check_data.back() == '%')
+		{
+			check_data.pop_back();
+			serverDataBatteryLevel = std::stoi(check_data);
+		}
+		else
+		{
+			serverDataBatteryLevel = *static_cast<const uint8_t *>(pData);
+		}
+		LogDebug((std::string("Server data: SET battery level to ") + 
+				std::to_string(serverDataBatteryLevel)).c_str());
 		return 1;
 	}
-	else if (strName == "text/string")
+	else
 	{
-		serverDataTextString = static_cast<const char *>(pData);
-		LogDebug((std::string("Server data: text string set to '") + serverDataTextString + "'").c_str());
+		server_data[strName] = std::string(static_cast<const char *>(pData));
+		LogDebug((std::string("Server data: SET ") + strName + " <= " + server_data[strName] ).c_str());
 		return 1;
 	}
 
@@ -289,7 +307,7 @@ int main(int argc, char **ppArgv)
 	//     This first parameter (the service name) must match tha name configured in the D-Bus permissions. See the Readme.md file
 	//     for more information.
 	//
-	if (!ggkStart("gobbledegook", "Gobbledegook", "Gobbledegook", dataGetter, dataSetter, kMaxAsyncInitTimeoutMS))
+	if (!ggkStart("gobbledegook", "Gobbledegook", "Gobbledegook", dataGetter, dataSetter, kMaxAsyncInitTimeoutMS, "server_template.json"))
 	{
 		return -1;
 	}
@@ -302,6 +320,8 @@ int main(int argc, char **ppArgv)
 		std::this_thread::sleep_for(std::chrono::seconds(15));
 
 		serverDataBatteryLevel = std::max(serverDataBatteryLevel - 1, 0);
+		LogDebug((std::string("Internal Update: battery level set to ") + 
+				std::to_string((char)serverDataBatteryLevel)).c_str());
 		ggkNofifyUpdatedCharacteristic("/com/gobbledegook/battery/level");
 	}
 
